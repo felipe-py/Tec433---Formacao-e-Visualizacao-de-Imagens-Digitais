@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import os 
 
-pasta = "imagens"
+pasta = "dataset"
 arquivos = os.listdir(pasta)
 relatorio_geral = {}
 totalpixels_mundo = 0
