@@ -1,51 +1,92 @@
 from PIL import Image
 import numpy as np
-import os 
+import os
 
-pasta = "dataset"
-arquivos = os.listdir(pasta)
-relatorio_geral = {}
-totalpixels_mundo = 0
-total_pixels_acesos_mundo = 0
+# valores da lista do relatorio geral atualmente
+#[total_pixels, lit_pixels, percentual,altura,largura] acessar indice correspondente
 
-# Primeiro loop: contar pixels e calcular total de pixels acesos
-for imgs in arquivos:
+dic_area_cada_regiao = {
+    'top-canada.tif': 9093507,  # Canadá
+    'top-USA.tif': 9833517,     # Estados Unidos
+    'top-Central-Amer.tif': 523780,  # América Central  
+    'top-South-Amer.tif': 17819100,  # América do Sul
+    'left-africa-europe.tif': 44403251,  # África e Europa combinadas
+    'center-russia.tif': 17098246,  # Rússia
+    'right-South-East-Asia.tif': 4500000,  # Sudeste Asiático
+    'right-bottom-Australia.tif': 7688287  # Austrália
+}
 
-    # Abrir imagem
-    img = Image.open(f"{pasta}/{imgs}")
+"""
+RECADO PARA FELIPE 
 
-    # Converter para tons de cinza
+fiz um monte de forma de calcular a area mas todas sem precisao, tem algumas imagens q nao da pra saber qual corte de satelite é 
+por isso desisti de usar largura, que é pior ainda pra pegar do que a area total
+se vc puder, analisa os valores das areas e faz um recorte com mais precisao, deixei o codigo pronto pra funcionar com qualquer valor colocado, basta alterar o dicionario 
+"""
+
+
+def processar_imagem(caminho_arquivo, threshold=128):
+    """Abre a imagem, converte para binário e retorna estatísticas de pixels."""
+    img = Image.open(caminho_arquivo)
     gray = img.convert("L")
-
-    # Transformar em array numpy
     arr = np.array(gray)
-
-    # Definir threshold
-    threshold = 128
+    
     binary = arr > threshold
-
-    # Contagem de pixels
     total_pixels = binary.size
     lit_pixels = binary.sum()
+    altura,largura = binary.shape
 
-    # Percentual de pixels acesos na própria imagem
-    percentual = (lit_pixels / total_pixels) * 100
-
-    # Guardar no dicionário (temporariamente, sem o percentual mundial)
-    relatorio_geral[imgs] = [total_pixels, lit_pixels, percentual]
-
-    totalpixels_mundo += total_pixels
-    total_pixels_acesos_mundo += lit_pixels
-
-# Segundo loop: calcular percentual em relação ao total de pixels acesos no mundo
-for imgs in relatorio_geral:
-    lit_pixels = relatorio_geral[imgs][1]
-    percentual_mundo = (lit_pixels / total_pixels_acesos_mundo) * 100
-    relatorio_geral[imgs].append(percentual_mundo)
+    percentual = (lit_pixels / total_pixels) * 100 if total_pixels > 0 else 0
+    
+    return total_pixels, lit_pixels, percentual,altura,largura
 
 
-# Mostrar resultado
-for chave,valor in relatorio_geral.items():
+def gerar_relatorio(pasta):
+    """Processa todas as imagens da pasta e retorna o relatório completo."""
+    arquivos = os.listdir(pasta)
+    relatorio_geral = {}
+    total_pixels_acesos_mundo = 0
 
-    print("="*50)
-    print(f"\n{chave.upper()}\n\ntotal de pixels: {valor[0]}\ntotal pixels acesos: {valor[1]},\nporcentagem relativa pixels acesos: {valor[2]:.2f}%\ntotal em relacao ao mundo: {valor[3]:.2f}%\n")
+    # Primeiro loop: processa cada imagem
+    for nome_arquivo in arquivos:
+
+        caminho = os.path.join(pasta, nome_arquivo)
+        total_pixels, lit_pixels, percentual,altura,largura = processar_imagem(caminho)
+        
+        total_pixels_acesos_mundo += lit_pixels
+
+        area_pixel_em_km_quadrado = (dic_area_cada_regiao[nome_arquivo] / total_pixels)
+        area_pixel_aceso = area_pixel_em_km_quadrado * lit_pixels
+                
+        relatorio_geral[nome_arquivo] = [total_pixels, lit_pixels, percentual,altura,largura,area_pixel_aceso,area_pixel_em_km_quadrado] 
+    # Segundo loop: calcula percentual em relação ao total do mundo
+  
+    return relatorio_geral
+
+def exibir_relatorio(relatorio_geral):
+    """Imprime o relatório de forma organizada."""
+    for nome, valores in relatorio_geral.items():
+        print("="*50)
+        print(
+
+            f"\n{nome.upper()}\n\n"
+            f"total de pixels: {valores[0]}\n"
+            f"total pixels acesos: {valores[1]}\n"
+           # f"porcentagem relativa pixels acesos: {valores[2]:.2f}%\n"
+           # f"total em relacao ao mundo: {valores[-1]:.2f}%\n" 
+            f"area por pixel: {valores[6]:.2f} km^2\n"
+            f"area pixels acesos: {valores[5]:.2f} km^2\n"
+        )
+
+def main():
+    pasta = "dataset"
+    relatorio = gerar_relatorio(pasta)
+    exibir_relatorio(relatorio)
+
+if __name__ == "__main__":
+    # Isso só roda se você executar ESTE arquivo diretamente
+    main()
+
+
+
+
