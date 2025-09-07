@@ -4,6 +4,15 @@ import os
 
 # valores da lista do relatorio geral atualmente
 
+#TODO OK : 1- contar a quantidade pixels (total, acesos) 
+#TODO OK : 2- consultar a area total da região em uma escala equivalente a imagem
+#TODO OK : 3- calcular a área de um pixel
+#TODO OK : 4- calcular a área total acesa de acordo com a quantidade de pixels acesos (área por pixel * numero de pixels acesos) 
+#TODO OK : 5 - calcular a densidade de pixels acesos de cada região
+#TODO OK : 6- somar as densidades para ter a densidade total 
+#TODO OK : 7- dividir a densidade de cada região com a densidade total 
+#TODO: 8- se quiser, comparar com a porcentagem da área acesa (que não significa densidade)
+
 dic_area_cada_regiao = {
     'top-canada.tif': 9093507,  # Canadá
     'top-USA.tif': 9833517,     # Estados Unidos
@@ -40,6 +49,16 @@ def processar_imagem(caminho_arquivo, threshold=128):
     return total_pixels, lit_pixels, percentual,altura,largura
 
 
+def calcula_area_pixel(nome_arquivo, total_pixels):
+    area_pixel_em_km_quadrado = (dic_area_cada_regiao[nome_arquivo] / total_pixels)
+    return area_pixel_em_km_quadrado
+
+
+def calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado):
+    area_pixel_aceso = area_pixel_em_km_quadrado * lit_pixels
+    return area_pixel_aceso
+
+
 def gerar_relatorio(pasta):
     """Processa todas as imagens da pasta e retorna o relatório completo."""
     arquivos = os.listdir(pasta)
@@ -54,8 +73,8 @@ def gerar_relatorio(pasta):
         
         total_pixels_acesos_mundo += lit_pixels
 
-        area_pixel_em_km_quadrado = (dic_area_cada_regiao[nome_arquivo] / total_pixels)
-        area_pixel_aceso = area_pixel_em_km_quadrado * lit_pixels
+        area_pixel_em_km_quadrado = calcula_area_pixel(nome_arquivo, total_pixels)
+        area_pixel_aceso = calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado)
 
         relatorio_geral[nome_arquivo] = {
             "total_pixels": total_pixels,
