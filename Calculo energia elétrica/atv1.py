@@ -10,7 +10,7 @@ import os
 #TODO OK : 4- calcular a área total acesa de acordo com a quantidade de pixels acesos (área por pixel * numero de pixels acesos) 
 #TODO OK : 5 - calcular a densidade de pixels acesos de cada região
 #TODO OK : 6- calcular densidade média total
-#TODO    : 7- dividir a densidade de cada região com a densidade total 
+#TODO OK  : 7- dividir a densidade de cada região com a densidade total 
 #TODO    : 8- se quiser, comparar com a porcentagem da área acesa (que não significa densidade)
 
 dic_area_cada_regiao = {
@@ -116,6 +116,21 @@ def calcula_densidade_geografica_mundial(total_lit_pixels, total_area_mundial):
     """
     densidade_geografica_mundial = total_lit_pixels / total_area_mundial
     return densidade_geografica_mundial
+
+
+def calcula_indice_densidade_relativa(densidade_regiao, densidade_mundial):
+    """Calcula o índice de densidade relativa.
+
+    Args:
+        densidade_regiao (number): Densidade geográfica da região
+        densidade_mundial (number): Densidade geográfica mundial
+
+    Returns:
+        number: Índice de densidade relativa
+    """
+    if densidade_mundial == 0:
+        return 0
+    return densidade_regiao / densidade_mundial
     
 
 def gerar_relatorio(pasta):
@@ -133,6 +148,7 @@ def gerar_relatorio(pasta):
         total_pixels_acesos_mundo += lit_pixels
         
         area_pixel_em_km_quadrado = calcula_area_pixel(nome_arquivo, total_pixels)
+        densidade_demografica_regiao = calcula_densidade_geografica_regiao(nome_arquivo, lit_pixels)
 
         relatorio_geral[nome_arquivo] = {
             "total_pixels": total_pixels,
@@ -142,20 +158,31 @@ def gerar_relatorio(pasta):
             "largura": largura,
             "area_pixels_acesos": calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado),
             "area_pixel_em_km_quadrado": area_pixel_em_km_quadrado,
-            "densidade_geografica": calcula_densidade_geografica_regiao(nome_arquivo, lit_pixels)
+            "densidade_geografica_regiao": densidade_demografica_regiao,
+            "indice_densidade_relativa": None  # Será calculado depois
         }
     
     relatorio_geral["info_mundial"] = {
         "total_pixels_acesos_mundo": total_pixels_acesos_mundo,
         "total_densidade_mundo": calcula_densidade_geografica_mundial(total_pixels_acesos_mundo, total_area_mundial)
     }
-  
+    
+    densidade_geografica_mundial = calcula_densidade_geografica_mundial(total_pixels_acesos_mundo, total_area_mundial)
+
+    for nome_arquivo in arquivos:
+        relatorio_geral[nome_arquivo]["indice_densidade_relativa"] = calcula_indice_densidade_relativa(relatorio_geral[nome_arquivo]["densidade_geografica_regiao"], densidade_geografica_mundial)
+
     return relatorio_geral
 
 def exibir_relatorio(relatorio_geral):
     """Imprime o relatório de forma organizada."""
     
     info_mundial = relatorio_geral.pop("info_mundial")
+    
+    print("="*50)
+    print("Informações mundiais calculadas:\n")
+    print(f"Total de pixels acesos no mundo: {info_mundial['total_pixels_acesos_mundo']}\n")
+    print(f"Densidade geográfica mundial: {info_mundial['total_densidade_mundo']:.6f} pixels/km²\n")
     
     for nome, valores in relatorio_geral.items():
         print("="*50)
@@ -168,13 +195,9 @@ def exibir_relatorio(relatorio_geral):
             f"largura da imagem: {valores['largura']} pixels\n"
             f"área total de pixels acesos: {valores['area_pixels_acesos']:.2f} km²\n"
             f"área de cada pixel: {valores['area_pixel_em_km_quadrado']:.6f} km²\n"
-            f"densidade geográfica: {valores['densidade_geografica']:.6f} pixels/km²\n"
+            f"densidade geográfica: {valores['densidade_geografica_regiao']:.6f} pixels/km²\n"
+            f"índice de densidade relativa: {valores['indice_densidade_relativa']:.6f}\n"
         )
-    
-    print("="*50)
-    print("Informações mundiais calculadas:\n")
-    print(f"Total de pixels acesos no mundo: {info_mundial['total_pixels_acesos_mundo']}\n")
-    print(f"Densidade geográfica mundial: {info_mundial['total_densidade_mundo']:.6f} pixels/km²\n")
     
 def main():
     pasta = "dataset"
