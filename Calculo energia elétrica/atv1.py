@@ -3,7 +3,6 @@ import numpy as np
 import os
 
 # valores da lista do relatorio geral atualmente
-#[total_pixels, lit_pixels, percentual,altura,largura] acessar indice correspondente
 
 dic_area_cada_regiao = {
     'top-canada.tif': 9093507,  # Canadá
@@ -57,8 +56,16 @@ def gerar_relatorio(pasta):
 
         area_pixel_em_km_quadrado = (dic_area_cada_regiao[nome_arquivo] / total_pixels)
         area_pixel_aceso = area_pixel_em_km_quadrado * lit_pixels
-                
-        relatorio_geral[nome_arquivo] = [total_pixels, lit_pixels, percentual,altura,largura,area_pixel_aceso,area_pixel_em_km_quadrado] 
+
+        relatorio_geral[nome_arquivo] = {
+            "total_pixels": total_pixels,
+            "lit_pixels": lit_pixels,
+            "percentual": percentual,
+            "altura": altura,
+            "largura": largura,
+            "area_pixels_acesos": area_pixel_aceso,
+            "area_pixel_em_km_quadrado": area_pixel_em_km_quadrado
+        }
     # Segundo loop: calcula percentual em relação ao total do mundo
   
     return relatorio_geral
@@ -70,12 +77,13 @@ def exibir_relatorio(relatorio_geral):
         print(
 
             f"\n{nome.upper()}\n\n"
-            f"total de pixels: {valores[0]}\n"
-            f"total pixels acesos: {valores[1]}\n"
-           # f"porcentagem relativa pixels acesos: {valores[2]:.2f}%\n"
-           # f"total em relacao ao mundo: {valores[-1]:.2f}%\n" 
-            f"area por pixel: {valores[6]:.2f} km^2\n"
-            f"area pixels acesos: {valores[5]:.2f} km^2\n"
+            f"total de pixels: {valores['total_pixels']}\n"
+            f"total pixels acesos: {valores['lit_pixels']}\n"
+            f"percentual de pixels acesos: {valores['percentual']:.2f}%\n"
+            f"altura da imagem: {valores['altura']} pixels\n"
+            f"largura da imagem: {valores['largura']} pixels\n"
+            f"área total de pixels acesos: {valores['area_pixels_acesos']:.2f} km²\n"
+            f"área de cada pixel: {valores['area_pixel_em_km_quadrado']:.6f} km²\n"
         )
 
 def main():
