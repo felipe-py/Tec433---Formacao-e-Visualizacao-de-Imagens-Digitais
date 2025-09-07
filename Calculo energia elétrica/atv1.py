@@ -9,8 +9,8 @@ import os
 #TODO OK : 3- calcular a área de um pixel
 #TODO OK : 4- calcular a área total acesa de acordo com a quantidade de pixels acesos (área por pixel * numero de pixels acesos) 
 #TODO OK : 5 - calcular a densidade de pixels acesos de cada região
-#TODO OK : 6- somar as densidades para ter a densidade total 
-#TODO OK : 7- dividir a densidade de cada região com a densidade total 
+#TODO  : 6- somar as densidades para ter a densidade total 
+#TODO  : 7- dividir a densidade de cada região com a densidade total 
 #TODO: 8- se quiser, comparar com a porcentagem da área acesa (que não significa densidade)
 
 dic_area_cada_regiao = {
@@ -24,14 +24,20 @@ dic_area_cada_regiao = {
     'right-bottom-Australia.tif': 7688287  # Austrália
 }
 
-"""
-RECADO PARA FELIPE 
 
-fiz um monte de forma de calcular a area mas todas sem precisao, tem algumas imagens q nao da pra saber qual corte de satelite é 
-por isso desisti de usar largura, que é pior ainda pra pegar do que a area total
-se vc puder, analisa os valores das areas e faz um recorte com mais precisao, deixei o codigo pronto pra funcionar com qualquer valor colocado, basta alterar o dicionario 
-"""
+def calcula_densidade_relativa(lit_pixels, total_pixels):
+    """Calcula a densidade relativa de pixels acesos.
 
+    Args:
+        lit_pixels (number): Total de pixels acesos
+        total_pixels (number): Total de pixels da imagem
+
+    Returns:
+        number: Percentual de pixels acesos em relação ao total
+    """
+    percentual = (lit_pixels / total_pixels) * 100 if total_pixels > 0 else 0
+    return percentual
+    
 
 def processar_imagem(caminho_arquivo, threshold=128):
     """Abre a imagem, converte para binário e retorna estatísticas de pixels."""
@@ -43,21 +49,57 @@ def processar_imagem(caminho_arquivo, threshold=128):
     total_pixels = binary.size
     lit_pixels = binary.sum()
     altura,largura = binary.shape
-
-    percentual = (lit_pixels / total_pixels) * 100 if total_pixels > 0 else 0
+    
+    percentual = calcula_densidade_relativa(lit_pixels, total_pixels)
     
     return total_pixels, lit_pixels, percentual,altura,largura
 
 
 def calcula_area_pixel(nome_arquivo, total_pixels):
+    """Calcula a área de um pixel em km².
+    
+    * Utiliza variável global dic_area_cada_regiao, contendo a área em km² representada em cada imagem.
+
+    Args:
+        nome_arquivo (str): nome do arquivo da imagem
+        total_pixels (number): total de pixels da imagem
+
+    Returns:
+        number: área de um pixel em km²
+    """
     area_pixel_em_km_quadrado = (dic_area_cada_regiao[nome_arquivo] / total_pixels)
     return area_pixel_em_km_quadrado
 
 
 def calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado):
+    """Calcula a área total em km² de pixels acesos.
+
+    Args:
+        lit_pixels (number): total de pixels acesos da imagem
+        area_pixel_em_km_quadrado (number): área de um pixel em km²
+
+    Returns:
+        number: área total de pixels acesos em km²
+    """
     area_pixel_aceso = area_pixel_em_km_quadrado * lit_pixels
     return area_pixel_aceso
 
+def calcula_densidade_geografica(nome_arquivo, total_pixels):
+    """Calcula a densidade geográfica de pixels por km².
+    
+    * Utiliza variável global dic_area_cada_regiao.
+
+    Args:
+        nome_arquivo (str): Nome do arquivo da imagem
+        total_pixels (number): Total de pixels da imagem
+
+    Returns:
+        number: Densidade geográfica de pixels por km²
+    """
+    area_regiao = dic_area_cada_regiao[nome_arquivo]
+    densidade_geografica = total_pixels / area_regiao 
+    return densidade_geografica
+    
 
 def gerar_relatorio(pasta):
     """Processa todas as imagens da pasta e retorna o relatório completo."""
@@ -75,6 +117,7 @@ def gerar_relatorio(pasta):
 
         area_pixel_em_km_quadrado = calcula_area_pixel(nome_arquivo, total_pixels)
         area_pixel_aceso = calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado)
+        densidade_geografica = calcula_densidade_geografica(nome_arquivo, total_pixels)
 
         relatorio_geral[nome_arquivo] = {
             "total_pixels": total_pixels,
@@ -83,7 +126,8 @@ def gerar_relatorio(pasta):
             "altura": altura,
             "largura": largura,
             "area_pixels_acesos": area_pixel_aceso,
-            "area_pixel_em_km_quadrado": area_pixel_em_km_quadrado
+            "area_pixel_em_km_quadrado": area_pixel_em_km_quadrado,
+            "densidade_geografica": densidade_geografica
         }
     # Segundo loop: calcula percentual em relação ao total do mundo
   
@@ -103,6 +147,7 @@ def exibir_relatorio(relatorio_geral):
             f"largura da imagem: {valores['largura']} pixels\n"
             f"área total de pixels acesos: {valores['area_pixels_acesos']:.2f} km²\n"
             f"área de cada pixel: {valores['area_pixel_em_km_quadrado']:.6f} km²\n"
+            f"densidade geográfica: {valores['densidade_geografica']:.2f} pixels/km²\n"
         )
 
 def main():
