@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 # valores da lista do relatorio geral atualmente
 
@@ -43,7 +44,15 @@ def calcula_densidade_relativa(lit_pixels, total_pixels):
     
 
 def processar_imagem(caminho_arquivo, threshold=128):
-    """Abre a imagem, converte para binário e retorna estatísticas de pixels."""
+    """Processa a imagem e retorna estatísticas de pixels.
+
+    Args:
+        caminho_arquivo (str): caminho do arquivo da imagem
+        threshold (int, optional): valor de limiar para binarização. Defaults to 128.
+
+    Returns:
+        tuple: estatísticas da imagem (total_pixels, lit_pixels, percentual, altura, largura)
+    """
     img = Image.open(caminho_arquivo)
     gray = img.convert("L")
     arr = np.array(gray)
@@ -202,11 +211,37 @@ def exibir_relatorio(relatorio_geral):
             f"densidade geográfica: {valores['densidade_geografica_regiao']:.6f} pixels/km²\n"
             f"índice de densidade relativa: {valores['indice_densidade_relativa']:.6f}\n"
         )
+        
+def add_labels(x, y):
+    for i in range(len(x)):
+        plt.text(i, y[i], y[i])  # Placing text slightly above the bar
+
+def gerar_graficos_barras(relatorio, parametro, y_label, titulo):
+    """Gera gráficos a partir dos dados processados."""
+    
+    relatorio.pop("info_mundial")
+    plt.bar([regiao[:-4] for regiao in relatorio.keys()], [dado[parametro] for dado in relatorio.values()])
+    add_labels([regiao[:-4] for regiao in relatorio.keys()], [dado[parametro].__round__(4) for dado in relatorio.values()])
+    plt.title(titulo)
+    plt.xlabel('Regiões')
+    plt.ylabel(y_label)
+    plt.show()
+    
+    for chave in relatorio.keys():
+        print(chave[:-4])
+        
+    for chave in relatorio.keys():
+        print(relatorio[chave][parametro].__round__(2))
     
 def main():
     pasta = "dataset"
     relatorio = gerar_relatorio(pasta)
-    exibir_relatorio(relatorio)
+    #exibir_relatorio(relatorio)
+    
+    #gerar_graficos_barras(relatorio, "area_pixel_em_km_quadrado", "Área em km²", "Valor de cada pixel da região em km²")
+    #gerar_graficos_barras(relatorio, "area_pixels_acesos", "Área em km²", "Área total de pixels acesos em km² por região")
+    #gerar_graficos_barras(relatorio, "densidade_geografica_regiao", "Densidade em pixels/km²", "Densidade geográfica por região")
+    
 
 if __name__ == "__main__":
     # Isso só roda se você executar ESTE arquivo diretamente
