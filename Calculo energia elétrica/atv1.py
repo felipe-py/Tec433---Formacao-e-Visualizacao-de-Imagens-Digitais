@@ -109,7 +109,7 @@ def calcula_densidade_geografica_regiao(area_pixel_aceso_regiao, nome_arquivo): 
         number: Densidade geográfica de pixels por km²
     """
     area_regiao = dic_area_cada_regiao[nome_arquivo]
-    densidade_geografica = area_pixel_aceso_regiao / area_regiao
+    densidade_geografica = (area_pixel_aceso_regiao / area_regiao) * 100
     return densidade_geografica
 
 
@@ -123,7 +123,7 @@ def calcula_densidade_geografica_mundial(area_total_iluminada, total_area_mundia
     Returns:
         number: Densidade geográfica mundial de pixels em porcentagem
     """
-    densidade_geografica_mundial = (area_total_iluminada / total_area_mundial)
+    densidade_geografica_mundial = (area_total_iluminada / total_area_mundial) * 100
     return densidade_geografica_mundial
 
 
@@ -139,7 +139,7 @@ def calcula_indice_densidade_relativa(densidade_regiao, densidade_mundial):
     """
     if densidade_mundial == 0:
         return 0
-    return densidade_regiao / densidade_mundial
+    return (densidade_regiao / densidade_mundial) 
     
 
 def gerar_relatorio(pasta):
@@ -160,8 +160,8 @@ def gerar_relatorio(pasta):
         area_pixel_em_km_quadrado = calcula_area_pixel(nome_arquivo, total_pixels)
         area_pixel_aceso_regiao = calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado)
         total_area_iluminada += area_pixel_aceso_regiao
-        
-        densidade_demografica_regiao = calcula_densidade_geografica_regiao(area_pixel_aceso_regiao, nome_arquivo)
+    
+        densidade_demografica_regiao = calcula_densidade_geografica_regiao(area_pixel_aceso_regiao, nome_arquivo) 
 
         relatorio_geral[nome_arquivo] = {
             "total_pixels": total_pixels,
@@ -172,14 +172,14 @@ def gerar_relatorio(pasta):
             "area_pixels_acesos": area_pixel_aceso_regiao,
             "area_pixel_em_km_quadrado": area_pixel_em_km_quadrado,
             "densidade_geografica_regiao": densidade_demografica_regiao,
-            "indice_densidade_relativa": None  # Será calculado depois
+            "indice_densidade_relativa": None # Será calculado depois
         }
         
     densidade_geografica_mundial = calcula_densidade_geografica_mundial(total_area_iluminada, total_area_mundial)
     
     relatorio_geral["info_mundial"] = {
         "total_pixels_acesos_mundo": total_pixels_acesos_mundo,
-        "total_densidade_mundo": densidade_geografica_mundial * 100  # Convertendo para porcentagem aqui, não prejudica no cálculo da função
+        "total_densidade_mundo": densidade_geografica_mundial  
     }
 
     for nome_arquivo in arquivos:
@@ -206,10 +206,10 @@ def exibir_relatorio(relatorio_geral):
             f"total de pixels: {valores['total_pixels']}\n"
             f"total pixels acesos: {valores['lit_pixels']}\n"
             f"percentual de pixels acesos: {valores['percentual']:.2f}%\n\n"
-            f"área de cada pixel: {valores['area_pixel_em_km_quadrado']:.6f} km²\n"
+            f"área de cada pixel: {valores['area_pixel_em_km_quadrado']:.2f} km²\n"
             f"área total de pixels acesos: {valores['area_pixels_acesos']:.2f} km²\n\n"
-            f"densidade geográfica: {valores['densidade_geografica_regiao']:.6f} pixels/km²\n"
-            f"índice de densidade relativa: {valores['indice_densidade_relativa']:.6f}\n"
+            f"densidade geográfica: {valores['densidade_geografica_regiao']:.2f} %\n"
+            f"índice de densidade relativa: {valores['indice_densidade_relativa']:.2f}x\n"
         )
         
 def add_labels(x, y):
@@ -236,7 +236,7 @@ def gerar_graficos_barras(relatorio, parametro, y_label, titulo):
 def main():
     pasta = "dataset"
     relatorio = gerar_relatorio(pasta)
-    #exibir_relatorio(relatorio)
+    exibir_relatorio(relatorio)
     
     #gerar_graficos_barras(relatorio, "area_pixel_em_km_quadrado", "Área em km²", "Valor de cada pixel da região em km²")
     #gerar_graficos_barras(relatorio, "area_pixels_acesos", "Área em km²", "Área total de pixels acesos em km² por região")
