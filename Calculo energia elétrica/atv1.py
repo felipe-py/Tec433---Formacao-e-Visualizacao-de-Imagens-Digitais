@@ -27,6 +27,7 @@ dic_area_cada_regiao = {
 
 total_area_mundial = dic_area_cada_regiao.values()
 total_area_mundial = sum(total_area_mundial)
+area_total_iluminada_mundial = 0
 
 
 def calcula_densidade_relativa(lit_pixels, total_pixels):
@@ -148,6 +149,7 @@ def gerar_relatorio(pasta):
     relatorio_geral = {}
     total_pixels_acesos_mundo = 0
     total_area_iluminada = 0
+    global area_total_iluminada_mundial
 
     # Primeiro loop: processa cada imagem
     for nome_arquivo in arquivos:
@@ -160,6 +162,7 @@ def gerar_relatorio(pasta):
         area_pixel_em_km_quadrado = calcula_area_pixel(nome_arquivo, total_pixels)
         area_pixel_aceso_regiao = calcula_area_pixel_acesos(lit_pixels, area_pixel_em_km_quadrado)
         total_area_iluminada += area_pixel_aceso_regiao
+        area_total_iluminada_mundial += area_pixel_aceso_regiao
     
         densidade_demografica_regiao = calcula_densidade_geografica_regiao(area_pixel_aceso_regiao, nome_arquivo) 
 
@@ -176,10 +179,13 @@ def gerar_relatorio(pasta):
         }
         
     densidade_geografica_mundial = calcula_densidade_geografica_mundial(total_area_iluminada, total_area_mundial)
+
     
     relatorio_geral["info_mundial"] = {
         "total_pixels_acesos_mundo": total_pixels_acesos_mundo,
-        "total_densidade_mundo": densidade_geografica_mundial  
+        "total_densidade_mundo": densidade_geografica_mundial,
+        "area_total_mundial":   total_area_mundial,
+        "arel_total_iluminada_mundial": area_total_iluminada_mundial
     }
 
     for nome_arquivo in arquivos:
@@ -194,7 +200,9 @@ def exibir_relatorio(relatorio_geral):
     
     print("="*50)
     print("Informações mundiais calculadas:\n")
-    print(f"Total de pixels acesos no mundo: {info_mundial['total_pixels_acesos_mundo']}\n")
+    print("Área total registrada",total_area_mundial,"km²")
+    print(f"Área total iluminada do mundo: {area_total_iluminada_mundial:.2f}km²")
+    print(f"Total de pixels acesos no mundo: {info_mundial['total_pixels_acesos_mundo']}")
     print(f"Densidade geográfica mundial: {info_mundial['total_densidade_mundo']:.2f} %\n")
     
     for nome, valores in relatorio_geral.items():
@@ -208,8 +216,8 @@ def exibir_relatorio(relatorio_geral):
             f"percentual de pixels acesos: {valores['percentual']:.2f}%\n\n"
             f"área de cada pixel: {valores['area_pixel_em_km_quadrado']:.2f} km²\n"
             f"área total de pixels acesos: {valores['area_pixels_acesos']:.2f} km²\n\n"
-            f"densidade geográfica: {valores['densidade_geografica_regiao']:.2f} %\n"
-            f"índice de densidade relativa: {valores['indice_densidade_relativa']:.2f}x\n"
+            f"densidade geográfica da região: {valores['densidade_geografica_regiao']:.2f} %\n"
+            f"densidade relativa ao mundo: {valores['indice_densidade_relativa']:.2f}x\n"
         )
         
 def add_labels(x, y):
