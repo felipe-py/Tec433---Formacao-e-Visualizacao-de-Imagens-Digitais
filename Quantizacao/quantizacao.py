@@ -32,16 +32,9 @@ def quantizar_imagem(imagem, bits_alvo):
 
     return imagem_reescalada.astype(np.uint8)
 
-# --- Preparação da Imagem de Teste ---
-# Em vez de carregar um arquivo, vamos GERAR uma imagem 256x256.
-# Usaremos um gradiente linear de preto (0) para branco (255).
-# Esta é a MELHOR imagem para visualizar o efeito da quantização.
-gradiente_1d = np.linspace(0, 255, 256)
-imagem_original = np.tile(gradiente_1d, (256, 1)).astype(np.uint8)
-
 # --- Execução e Plotagem ---
 
-# Níveis de bits que queremos exibir (como nas Figuras 27 e 28)
+# Níveis de bits que queremos exibir
 # 8 bits = 256 níveis (Original)
 # 7 bits = 128 níveis
 # 6 bits = 64 níveis
@@ -52,39 +45,13 @@ imagem_original = np.tile(gradiente_1d, (256, 1)).astype(np.uint8)
 # 1 bit  = 2 níveis
 lista_de_bits = [8, 7, 6, 5, 4, 3, 2, 1]
 
-# Criar uma grade de plotagem 2x4
-fig, eixos = plt.subplots(2, 4, figsize=(16, 8))
-fig.suptitle("Redução de Resolução de Intensidade (Quantização)", fontsize=16)
-
-# "Achatar" o array de eixos 2x4 para um array 1x8 para facilitar o loop
-eixos = eixos.flatten()
-
-for i, bits in enumerate(lista_de_bits):
-    
-    # Processar a imagem
-    if bits == 8:
-        imagem_processada = imagem_original
-    else:
-        imagem_processada = quantizar_imagem(imagem_original, bits)
-    
-    # Calcular o número de níveis
-    niveis = 2**bits
-    
-    # Plotar a imagem
-    eixos[i].imshow(imagem_processada, cmap='gray', vmin=0, vmax=255)
-    eixos[i].set_title(f"{bits} bits ($2^{bits} = {niveis}$ Níveis)")
-    eixos[i].axis('off') # Remover eixos
-
-plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-plt.show()
-
 
 # Carregando imagem de exemplo
-'''from PIL import Image
+from PIL import Image
 
 try:
     # 'L' converte para Níveis de Cinza (8 bits)
-    img_pil = Image.open('gradiente.png').convert('L') 
+    img_pil = Image.open('image.png').convert('L') 
     # Redimensiona para 256x256 como pedido
     img_pil = img_pil.resize((256, 256)) 
     imagem_original = np.array(img_pil)
@@ -119,4 +86,4 @@ for i, bits in enumerate(lista_de_bits):
     eixos[i].axis('off') # Remover eixos
 
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-plt.show()'''
+plt.show()
