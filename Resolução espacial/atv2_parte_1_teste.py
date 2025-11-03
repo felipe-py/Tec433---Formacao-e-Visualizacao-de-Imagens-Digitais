@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 # Usar um try-except é uma boa prática para carregar arquivos
 try:
     # 1. Carregar a imagem correta e converter para tons de cinza ("L")
-    imagem_original = Image.open("lena 256x256.tif").convert("L")
+    imagem_original = Image.open("images/lena 256x256.tif"  ).convert("L")
 except FileNotFoundError:
     print("Erro: Arquivo 'lena 256x256.tif' não encontrado.")
     print("Por favor, coloque o arquivo na mesma pasta do script.")
