@@ -7,7 +7,6 @@ try:
     print("Arquivo 'lena 256x256.tif' carregado.")
 except FileNotFoundError:
     print("Erro: Arquivo 'lena 256x256.tif' não encontrado.")
-    print("Por favor, coloque o arquivo na mesma pasta do script.")
     exit()
 # -----------------------------------------------------------------
 
