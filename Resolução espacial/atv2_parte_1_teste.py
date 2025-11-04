@@ -18,9 +18,9 @@ resolucoes_reduzidas = [128, 64, 32, 16, 8]
 
 # 3. Criar a figura com subplots
 num_linhas = len(resolucoes_reduzidas)
-num_colunas = 4
+num_colunas = 3
 
-fig, axes = plt.subplots(num_linhas, num_colunas, figsize=(16, num_linhas * 4))
+fig, axes = plt.subplots(num_linhas, num_colunas, figsize=(12, num_linhas * 4))
 
 # Título principal da figura
 fig.suptitle("Comparação de Reconstrução por Interpolação", fontsize=16, y=1.0)
@@ -30,14 +30,11 @@ if num_linhas > 1:
     axes[0, 0].set_title("Original (256x256)", fontsize=12)
     axes[0, 1].set_title("Reconstrução (NEAREST)", fontsize=12)
     axes[0, 2].set_title("Reconstrução (BILINEAR)", fontsize=12)
-    axes[0, 3].set_title("Reconstrução (BICUBIC)", fontsize=12)
 else:
     # Caso especial para apenas 1 linha (ex: resolucoes_reduzidas = [16])
     axes[0].set_title("Original (256x256)", fontsize=12)
     axes[1].set_title("Reconstrução (NEAREST)", fontsize=12)
     axes[2].set_title("Reconstrução (BILINEAR)", fontsize=12)
-    axes[3].set_title("Reconstrução (BICUBIC)", fontsize=12)
-
 
 # 5. Loop principal (gradualmente diminuindo)
 for i, res in enumerate(resolucoes_reduzidas):
@@ -45,12 +42,11 @@ for i, res in enumerate(resolucoes_reduzidas):
     res_alvo = (res, res)
     
     # --- "Destruir" (Downsampling) ---
-    img_reduzida = imagem_original.resize(res_alvo, Image.Resampling.BICUBIC)
+    img_reduzida = imagem_original.resize(res_alvo, Image.Resampling.BILINEAR)
     
     # --- "Reconstruir" (Upsampling) com cada método ---
     recon_nearest = img_reduzida.resize(tamanho_original, Image.Resampling.NEAREST)
     recon_bilinear = img_reduzida.resize(tamanho_original, Image.Resampling.BILINEAR)
-    recon_bicubic = img_reduzida.resize(tamanho_original, Image.Resampling.BICUBIC)
 
     # --- Determinar a linha de eixos correta ---
     # Se num_linhas > 1, 'axes' é 2D. Se num_linhas == 1, 'axes' é 1D.
@@ -68,9 +64,6 @@ for i, res in enumerate(resolucoes_reduzidas):
     # Coluna 2: BILINEAR
     ax_row[2].imshow(recon_bilinear, cmap="gray", vmin=0, vmax=255)
 
-    # Coluna 3: BICUBIC
-    ax_row[3].imshow(recon_bicubic, cmap="gray", vmin=0, vmax=255)
-
     # Desligar os eixos para todas as imagens
     for j in range(num_colunas):
         ax_row[j].axis("off")
@@ -81,7 +74,7 @@ for i, res in enumerate(resolucoes_reduzidas):
 plt.tight_layout(rect=[0, 0.03, 1, 0.97])
 
 # Salva a figura em um arquivo
-plt.savefig("comparacao_interpolacao_completa.png")
+plt.savefig("comparacao_interpolacao_reduzida.png")
 
 plt.show()
 
